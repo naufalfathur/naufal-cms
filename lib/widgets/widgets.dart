@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hexcolor/hexcolor.dart';
+import 'dart:math' as math;
 
 divider(double width) {
   return Container(
@@ -13,6 +15,7 @@ divider(double width) {
 PreferredSize appbar(context,
     {required String strTitle,
     disappearedBackButton = true,
+    whiteTitle = false,
     disableTabBar = true,
     dynamic row}) {
   return PreferredSize(
@@ -37,7 +40,9 @@ PreferredSize appbar(context,
                     strTitle,
                     style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                            color: Theme.of(context).accentColor,
+                            color: whiteTitle
+                                ? Colors.white
+                                : Theme.of(context).accentColor,
                             fontWeight: FontWeight.w700,
                             fontSize: 28)),
                     overflow: TextOverflow.clip,
@@ -91,5 +96,82 @@ iconButton(IconData iconData, Function() function, {bool shaddow = true}) {
       ),
       child: Icon(iconData, color: Colors.black),
     ),
+  );
+}
+
+inputRow(IconData icon, String name, TextEditingController text,
+    BuildContext context, String types,
+    [dynamic funciton, dynamic selectedDate]) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 15,
+        children: [
+          Icon(icon),
+          Text(
+            name,
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  fontSize: 13.0,
+                  color: HexColor("#C4C4C4"),
+                  fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+      if (types == "textfield")
+        Expanded(
+          flex: 2,
+          child: TextField(
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            ),
+            textAlign: TextAlign.end,
+            controller: text,
+            decoration: InputDecoration(
+                hintText: name,
+                hintStyle: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                      fontWeight: FontWeight.w500, color: Colors.black26),
+                ),
+                border: InputBorder.none),
+          ),
+        ),
+      if (types == "datetime")
+        GestureDetector(
+          onTap: funciton, // Refer step 3
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Text(
+                  "${selectedDate.toLocal()}".split(' ')[0],
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Icon(
+                  Icons.calendar_today,
+                  color: Colors.black,
+                )
+              ],
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+squareAvatar() {
+  return Container(
+    decoration: BoxDecoration(
+        color: Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
+            .withOpacity(0.5),
+        borderRadius: BorderRadius.circular(5)),
+    width: 40,
+    height: 40,
   );
 }

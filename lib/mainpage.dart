@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
-import 'package:naufal_cms/pages/homepage.dart';
-import 'package:naufal_cms/pages/listpage.dart';
-import 'package:naufal_cms/pages/profilepage.dart';
+import 'package:naufal_cms/mainpages/homepage.dart';
+import 'package:naufal_cms/mainpages/listpage.dart';
+import 'package:naufal_cms/mainpages/profilepage.dart';
 
 class Mainpage extends StatefulWidget {
   @override

@@ -1,45 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:naufal_cms/pages/updatelead.dart';
 import 'package:naufal_cms/widgets/localdata.dart';
 import 'package:naufal_cms/widgets/widgets.dart';
 import 'dart:math' as math;
 
-class Homepage extends StatefulWidget {
+class Listpage extends StatefulWidget {
   @override
-  _HomepageState createState() => _HomepageState();
+  _ListpageState createState() => _ListpageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _ListpageState extends State<Listpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: HexColor("#F9F9F9"),
-      appBar: appbar(context, strTitle: "Hi Jane!"),
+      appBar: appbar(context, strTitle: "Leads list"),
       body: Container(
-        margin: EdgeInsets.only(top: 50),
-        color: Colors.white,
-        //padding: EdgeInsets.all(30),
         alignment: Alignment.center,
         child: Column(
           children: [
-            SizedBox(
-              height: 20,
-            ),
-            Text("potential",
+            Text("all",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                     textStyle:
                         TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
             divider(MediaQuery.of(context).size.width),
-            potentialList(),
+            leadsList(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return Updatelead();
+          }));
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.black,
       ),
     );
   }
 
-  potentialList() {
+  leadsList() {
     return Expanded(
       child: ListView.builder(
         itemCount: leads.length,
