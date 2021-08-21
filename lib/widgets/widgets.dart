@@ -175,3 +175,35 @@ squareAvatar() {
     height: 40,
   );
 }
+
+textField(String hint,
+    {bool multiline = false,
+    bool needHeader = false,
+    String header = "",
+    TextEditingController? text}) {
+  return Expanded(
+    flex: 5,
+    child: TextField(
+      controller: text!,
+      textAlign: TextAlign.start,
+      style: TextStyle(fontWeight: FontWeight.bold),
+      keyboardType: multiline ? TextInputType.multiline : TextInputType.text,
+      maxLines: multiline ? null : 1,
+      minLines: multiline ? null : 1,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(fontWeight: FontWeight.normal),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5),
+          borderSide: BorderSide(
+            width: 0,
+            style: BorderStyle.none,
+          ),
+        ),
+        filled: true,
+        contentPadding: EdgeInsets.all(16),
+        fillColor: HexColor("#F2F2F2"),
+      ),
+    ),
+  );
+}
