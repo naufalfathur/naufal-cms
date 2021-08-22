@@ -10,7 +10,7 @@ class Leads {
       this.postcode, this.lastcall, this.status);
   String name;
   String email;
-  int phone;
+  String phone;
   DateTime dob;
   String address;
   String postcode;
@@ -42,13 +42,13 @@ List<User> user = <User>[
 ];
 
 List<Leads> leads = <Leads>[
-  Leads("John Doe", "johndoe@gmail.com", 0123456789, DateTime.now(),
+  Leads("John Doe", "johndoe@gmail.com", "0123456789", DateTime.now(),
       "Bangsar, Kuala Lumpur", "525500", DateTime.now(), "Potential"),
-  Leads("Alexander Pona", "lxnderpona@gmail.com", 012733226, DateTime.now(),
+  Leads("Alexander Pona", "lxnderpona@gmail.com", "012733226", DateTime.now(),
       "Bangsar, Kuala Lumpur", "525500", DateTime.now(), "Potential"),
-  Leads("Bruce Man", "manbruce@gmail.com", 015673322, DateTime.now(),
+  Leads("Bruce Man", "manbruce@gmail.com", "015673322", DateTime.now(),
       "Bangsar, Kuala Lumpur", "525500", DateTime.now(), "Potential"),
-  Leads("Risa Joana", "risajoana@gmail.com", 0123112456, DateTime.now(),
+  Leads("Risa Joana", "risajoana@gmail.com", "0123112456", DateTime.now(),
       "Bangsar, Kuala Lumpur", "525500", DateTime.now(), "Potential"),
 ];
 

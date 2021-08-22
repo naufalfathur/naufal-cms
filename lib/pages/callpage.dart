@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:naufal_cms/mainpages/profilepage.dart';
 import 'package:naufal_cms/widgets/localdata.dart';
+//import 'package:naufal_cms/widgets/notificationservice.dart';
 import 'package:naufal_cms/widgets/widgets.dart';
+import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
+//import 'package:timezone/timezone.dart' as tz;
+//import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Callpage extends StatefulWidget {
   String email;
@@ -24,6 +30,9 @@ class _CallpageState extends State<Callpage> {
   List<Calls> _calls = [];
   TextEditingController _title = TextEditingController();
   TextEditingController _notes = TextEditingController();
+  bool isCalling = false;
+
+  var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -32,7 +41,39 @@ class _CallpageState extends State<Callpage> {
     if (callDetail != null) {
       _calls = callDetail;
     }
+
     _leads.add(leads[leads.indexWhere((element) => element.email == email)]);
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsIOS = IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String? payload) async {
+    if (payload != null) {
+      print('notification payload: ' + payload);
+    }
+  }
+
+  Future _showNotification() async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.max, priority: Priority.high);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+
+    String trendingNewsId = '5';
+    await flutterLocalNotificationsPlugin.show(
+        0,
+        'Naufal CMS - already calling ?',
+        'tap to open notes',
+        platformChannelSpecifics,
+        payload: trendingNewsId);
   }
 
   @override
@@ -87,7 +128,7 @@ class _CallpageState extends State<Callpage> {
                     ),
                   ),
                   detailList(Icons.mail, _leads[0].email),
-                  detailList(Icons.phone, _leads[0].phone.toString()),
+                  detailList(Icons.phone, _leads[0].phone),
                   detailList(Icons.calendar_today, _leads[0].dob.toString()),
                   detailList(Icons.location_pin, _leads[0].address),
                   detailList(Icons.location_pin, _leads[0].postcode),
@@ -97,10 +138,13 @@ class _CallpageState extends State<Callpage> {
             greenWidget(
               Icons.phone,
               "Start Call",
-              _leads[0].phone.toString(),
+              _leads[0].phone,
               () {
                 setState(() {
+                  UrlLauncher.launch('tel:+${_leads[0].phone}');
+                  isCalling = true;
                   pageIndex = 1;
+                  _showNotification();
                 });
               },
             ),
@@ -239,13 +283,26 @@ class _CallpageState extends State<Callpage> {
           ],
         ),
       ),
-      bottomSheet: button("Save", () {
-        setState(() {
-          _calls.add(Calls(DateTime.now().toString(), _leads[0].email,
-              _title.text, DateTime.now(), DateTime.now(), true, _notes.text));
-          pageIndex = 2;
-        });
-      }, Theme.of(context).accentColor, Colors.white),
+      bottomSheet: button(isCalling ? "End Call" : "Save", () {
+        if (isCalling) {
+          setState(() {
+            isCalling = false;
+          });
+        } else {
+          setState(() {
+            _calls.add(Calls(
+                DateTime.now().toString(),
+                _leads[0].email,
+                _title.text,
+                DateTime.now(),
+                DateTime.now(),
+                true,
+                _notes.text));
+            pageIndex = 2;
+          });
+        }
+      }, isCalling ? Colors.redAccent : Theme.of(context).accentColor,
+          Colors.white),
     );
   }
 
