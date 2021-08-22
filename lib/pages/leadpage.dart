@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:naufal_cms/pages/callpage.dart';
 import 'package:naufal_cms/widgets/localdata.dart';
 import 'package:naufal_cms/widgets/widgets.dart';
 
@@ -42,6 +43,15 @@ class _LeadpageState extends State<Leadpage> {
           ],
         ),
       ),
+      bottomSheet: button("Phone Call", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Callpage(
+                    email: email,
+                  )),
+        );
+      }, HexColor("#F6F6F6"), Theme.of(context).accentColor, icon: Icons.phone),
     );
   }
 
@@ -82,7 +92,7 @@ class _LeadpageState extends State<Leadpage> {
     return Expanded(
       child: Container(
         margin: EdgeInsets.only(top: 20),
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         child: Column(
@@ -118,7 +128,7 @@ class _LeadpageState extends State<Leadpage> {
   callsWidget(
       int index, String title, DateTime date, bool status, String note) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
           color: Colors.white,

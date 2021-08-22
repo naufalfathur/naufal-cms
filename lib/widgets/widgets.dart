@@ -176,33 +176,94 @@ squareAvatar() {
   );
 }
 
-textField(String hint,
-    {bool multiline = false,
-    bool needHeader = false,
-    String header = "",
-    TextEditingController? text}) {
-  return Expanded(
-    flex: 5,
-    child: TextField(
-      controller: text!,
-      textAlign: TextAlign.start,
-      style: TextStyle(fontWeight: FontWeight.bold),
-      keyboardType: multiline ? TextInputType.multiline : TextInputType.text,
-      maxLines: multiline ? null : 1,
-      minLines: multiline ? null : 1,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(fontWeight: FontWeight.normal),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(
-            width: 0,
-            style: BorderStyle.none,
+textField(
+  String hint,
+  TextEditingController text, {
+  bool multiline = false,
+  bool needFooter = false,
+  IconData footerIcon = Icons.edit,
+  bool isEnabled = true,
+}) {
+  return Container(
+    alignment: Alignment.topRight,
+    decoration: needFooter
+        ? BoxDecoration(
+            border: Border(
+            bottom: BorderSide(width: 2.0, color: Colors.black),
+          ))
+        : multiline
+            ? BoxDecoration(
+                border: Border.all(width: 1.0, color: Colors.black12),
+                borderRadius: BorderRadius.circular(10))
+            : BoxDecoration(),
+    child: Row(
+      children: [
+        Flexible(
+          child: TextField(
+            textAlign: TextAlign.start,
+            controller: text,
+            enabled: isEnabled,
+            style: TextStyle(
+                fontWeight: multiline ? FontWeight.w400 : FontWeight.bold),
+            keyboardType:
+                multiline ? TextInputType.multiline : TextInputType.text,
+            maxLines: multiline ? null : 1,
+            minLines: multiline ? null : 1,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(fontWeight: FontWeight.normal),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5),
+                borderSide: BorderSide(
+                  width: 0,
+                  style: BorderStyle.none,
+                ),
+              ),
+              filled: true,
+              contentPadding: EdgeInsets.all(16),
+              fillColor: Colors.white,
+            ),
           ),
         ),
-        filled: true,
-        contentPadding: EdgeInsets.all(16),
-        fillColor: HexColor("#F2F2F2"),
+        Offstage(
+          offstage: !needFooter,
+          child: Container(
+            alignment: Alignment.centerRight,
+            child: Icon(footerIcon),
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+button(String text, dynamic function, Color bgColor, Color txtColor,
+    {IconData? icon}) {
+  return GestureDetector(
+    onTap: function,
+    child: Container(
+      height: 60,
+      alignment: Alignment.center,
+      width: double.infinity,
+      decoration:
+          BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(0)),
+      child: Wrap(
+        spacing: 10,
+        children: [
+          Offstage(
+              offstage: icon == null,
+              child: Icon(
+                icon,
+                color: txtColor,
+              )),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                  color: txtColor, fontWeight: FontWeight.w800, fontSize: 13),
+            ),
+          ),
+        ],
       ),
     ),
   );
