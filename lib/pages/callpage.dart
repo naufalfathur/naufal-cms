@@ -21,7 +21,7 @@ class _CallpageState extends State<Callpage> {
   _CallpageState({required this.email, this.pageIndex = 0, this.callDetail});
 
   List<Leads> _leads = [];
-  List<Leads> _calls = [];
+  List<Calls> _calls = [];
   TextEditingController _title = TextEditingController();
   TextEditingController _notes = TextEditingController();
 
@@ -241,6 +241,8 @@ class _CallpageState extends State<Callpage> {
       ),
       bottomSheet: button("Save", () {
         setState(() {
+          _calls.add(Calls(DateTime.now().toString(), _leads[0].email,
+              _title.text, DateTime.now(), DateTime.now(), true, _notes.text));
           pageIndex = 2;
         });
       }, Theme.of(context).accentColor, Colors.white),
@@ -273,11 +275,11 @@ class _CallpageState extends State<Callpage> {
                             fontWeight: FontWeight.w700),
                       ),
                     ),
-                    callList("date", "214214"),
-                    callList("start", "214214"),
-                    callList("end", "214214"),
-                    callList("duration", "214214"),
-                    callList("status", "Success"),
+                    callList("date", _calls[0].startDate.toString()),
+                    callList("start", _calls[0].startDate.toString()),
+                    callList("end", _calls[0].startDate.toString()),
+                    callList("duration", "1" + "Minutes"),
+                    callList("status", _calls[0].isSuccess.toString()),
                     Divider(
                       color: Theme.of(context).accentColor,
                     ),
