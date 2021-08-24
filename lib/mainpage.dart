@@ -95,67 +95,70 @@ class _MainpageState extends State<Mainpage> {
   loginScreen() {
     return Scaffold(
         backgroundColor: Colors.white,
-        body: Container(
-          padding: EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 80,
-                child: Image(
-                  image: AssetImage("assets/images/logo.png"),
-                  fit: BoxFit.fitHeight,
+        body: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            padding: EdgeInsets.all(30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 80,
+                  child: Image(
+                    image: AssetImage("assets/images/logo.png"),
+                    fit: BoxFit.fitHeight,
+                  ),
                 ),
-              ),
-              Text("Connect with your leads\nbetter, faster, Wherever",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 18))),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                height: 150,
-                child: Image(
-                  image: AssetImage("assets/images/landing.png"),
-                  fit: BoxFit.fitHeight,
+                Text("Connect with your leads\nbetter, faster, Wherever",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 18))),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  height: 150,
+                  child: Image(
+                    image: AssetImage("assets/images/landing.png"),
+                    fit: BoxFit.fitHeight,
+                  ),
                 ),
-              ),
-              Text("Lets get started",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 15))),
-              textField("Username", uname, isWhite: false),
-              textField("Password", uname, isWhite: false),
-              button("Sign In", () {
-                setState(() {
-                  isSignedIn = true;
-                });
-              }, Colors.black, Colors.white, rounded: true, height: 50),
-              Divider(
-                color: Colors.black38,
-                thickness: 1,
-              ),
-              button("Continue with Google", () async {
-                final success = await Navigator.push(context,
-                    MaterialPageRoute(builder: (context) {
-                  return Onboardpage();
-                }));
-                if (success != null && success == true) {
+                Text("Lets get started",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 15))),
+                textField("Username", uname, isWhite: false),
+                textField("Password", uname, isWhite: false),
+                button("Sign In", () {
                   setState(() {
                     isSignedIn = true;
                   });
-                }
-              }, Theme.of(context).accentColor, Colors.white,
-                  icon: FontAwesomeIcons.google, rounded: true, height: 50),
-              Text(
-                  "Account will be created automatically if you're not registered",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                          fontWeight: FontWeight.w500, fontSize: 10))),
-            ],
+                }, Colors.black, Colors.white, rounded: true, height: 50),
+                Divider(
+                  color: Colors.black38,
+                  thickness: 1,
+                ),
+                button("Continue with Google", () async {
+                  final success = await Navigator.push(context,
+                      MaterialPageRoute(builder: (context) {
+                    return Onboardpage();
+                  }));
+                  if (success != null && success == true) {
+                    setState(() {
+                      isSignedIn = true;
+                    });
+                  }
+                }, Theme.of(context).accentColor, Colors.white,
+                    icon: FontAwesomeIcons.google, rounded: true, height: 50),
+                Text(
+                    "Account will be created automatically if you're not registered",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 10))),
+              ],
+            ),
           ),
         ));
   }

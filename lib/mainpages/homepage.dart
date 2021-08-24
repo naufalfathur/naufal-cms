@@ -242,16 +242,17 @@ class _HomepageState extends State<Homepage> {
 
   quickAccess() {
     List<Leads> _leads = [];
+    List<Calls> _calls = List.from(calls);
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 140,
       child: ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
-          itemCount: calls.length,
+          itemCount: _calls.length,
           itemBuilder: (BuildContext context, int index) {
-            _leads.add(leads[leads
-                .indexWhere((element) => element.email == calls[index].email)]);
+            _leads.add(leads[leads.indexWhere(
+                (element) => element.email == _calls[index].email)]);
             return Container(
               margin: EdgeInsets.only(left: 20),
               width: MediaQuery.of(context).size.width - 80,
