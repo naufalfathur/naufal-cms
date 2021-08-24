@@ -6,40 +6,63 @@ import 'package:naufal_cms/widgets/localdata.dart';
 //import 'package:naufal_cms/widgets/notificationservice.dart';
 import 'package:naufal_cms/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
-//import 'package:timezone/timezone.dart' as tz;
-//import 'package:timezone/data/latest.dart' as tz;
+import 'package:intl/intl.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Callpage extends StatefulWidget {
   String email;
   int pageIndex;
   dynamic callDetail;
-  Callpage({required this.email, this.pageIndex = 0, this.callDetail});
+  bool enableEdit;
+  Callpage(
+      {required this.email,
+      this.pageIndex = 0,
+      this.callDetail,
+      this.enableEdit = true});
   @override
   _CallpageState createState() => _CallpageState(
-      email: email, pageIndex: pageIndex, callDetail: callDetail);
+      email: email,
+      pageIndex: pageIndex,
+      callDetail: callDetail,
+      enableEdit: enableEdit);
 }
 
 class _CallpageState extends State<Callpage> {
   String email;
   int pageIndex = 0;
   dynamic callDetail;
-  _CallpageState({required this.email, this.pageIndex = 0, this.callDetail});
+  bool enableEdit;
+  _CallpageState(
+      {required this.email,
+      this.pageIndex = 0,
+      this.callDetail,
+      this.enableEdit = true});
 
   List<Leads> _leads = [];
   List<Calls> _calls = [];
   TextEditingController _title = TextEditingController();
   TextEditingController _notes = TextEditingController();
   bool isCalling = false;
-
+  final StopWatchTimer _stopWatchTimer = StopWatchTimer();
   var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  DateTime _start = DateTime.now();
+  DateTime _end = DateTime.now();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    print(DateTime.now());
     if (callDetail != null) {
-      _calls = callDetail;
+      _calls.add(callDetail);
+      _title.text = callDetail.title == null ? "" : callDetail.title;
+      _notes.text = !callDetail.isSuccess
+          ? "Call Failed"
+          : callDetail.note == null
+              ? ""
+              : callDetail.note;
     }
 
     _leads.add(leads[leads.indexWhere((element) => element.email == email)]);
@@ -50,6 +73,18 @@ class _CallpageState extends State<Callpage> {
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
+  }
+
+  final stopWatchTimer = StopWatchTimer(
+    mode: StopWatchMode.countUp,
+    onChange: (value) => print('onChange $value'),
+    onChangeRawSecond: (value) => print('onChangeRawSecond $value'),
+    onChangeRawMinute: (value) => print('onChangeRawMinute $value'),
+  );
+
+  void dispose() async {
+    super.dispose();
+    await _stopWatchTimer.dispose(); // Need to call dispose function.
   }
 
   Future onSelectNotification(String? payload) async {
@@ -144,11 +179,15 @@ class _CallpageState extends State<Callpage> {
                   UrlLauncher.launch('tel:+${_leads[0].phone}');
                   isCalling = true;
                   pageIndex = 1;
+                  _start = DateTime.now();
+                  _stopWatchTimer.onExecute.add(StopWatchExecute.start);
                   _showNotification();
                 });
               },
             ),
-            circleButton(Icons.close, Colors.red, () {}),
+            circleButton(Icons.close, Colors.red, () {
+              Navigator.pop(context);
+            }),
           ],
         ),
       ),
@@ -259,14 +298,57 @@ class _CallpageState extends State<Callpage> {
 
   noteScreen() {
     return Scaffold(
-      appBar: appbar(context, strTitle: "Call Note"),
+      appBar: appbar(context, strTitle: "Call Note", row: noteRow()),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
         margin: EdgeInsets.only(bottom: 80),
         child: Column(
           children: [
-            greenWidget(Icons.supervised_user_circle, _leads[0].name,
-                "Tap to see profile", () {}),
+            greenWidget(
+              Icons.supervised_user_circle,
+              _leads[0].name,
+              "Tap to see profile",
+              () {},
+              col: callDetail == null
+                  ? Column(
+                      children: [
+                        Divider(
+                          color: Colors.white,
+                          thickness: 1,
+                        ),
+                        StreamBuilder<int>(
+                          stream: _stopWatchTimer.rawTime,
+                          initialData: 0,
+                          builder: (context, snap) {
+                            final value = snap.data;
+                            final displayTime =
+                                StopWatchTimer.getDisplayTime(value!);
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  "Calling..",
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  displayTime,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Divider(),
+                      ],
+                    )
+                  : Column(),
+            ),
             SizedBox(
               height: 10,
             ),
@@ -283,23 +365,45 @@ class _CallpageState extends State<Callpage> {
           ],
         ),
       ),
-      bottomSheet: button(isCalling ? "End Call" : "Save", () {
+      bottomSheet: button(isCalling ? "Stop Timer" : "Save", () {
         if (isCalling) {
+          _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
           setState(() {
+            _end = DateTime.now();
             isCalling = false;
           });
         } else {
-          setState(() {
-            _calls.add(Calls(
-                DateTime.now().toString(),
-                _leads[0].email,
-                _title.text,
-                DateTime.now(),
-                DateTime.now(),
-                true,
-                _notes.text));
-            pageIndex = 2;
-          });
+          if (callDetail == null) {
+            setState(() {
+              _calls.add(Calls(DateTime.now().toString(), _leads[0].email,
+                  _title.text, _start, _end, true, _notes.text));
+              calls.add(Calls(DateTime.now().toString(), _leads[0].email,
+                  _title.text, _start, _end, true, _notes.text));
+              leads[leads.indexWhere((element) => element.email == email)]
+                  .lastcall = _end;
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Calls Recorded')));
+              pageIndex = 2;
+            });
+          } else {
+            setState(() {
+              _calls[_calls.indexWhere(
+                      (element) => element.callId == callDetail.callId)]
+                  .title = _title.text;
+              _calls[_calls.indexWhere(
+                      (element) => element.callId == callDetail.callId)]
+                  .note = _notes.text;
+              calls[calls.indexWhere(
+                      (element) => element.callId == callDetail.callId)]
+                  .title = _title.text;
+              calls[calls.indexWhere(
+                      (element) => element.callId == callDetail.callId)]
+                  .note = _notes.text;
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Calls Recorded')));
+              pageIndex = 2;
+            });
+          }
         }
       }, isCalling ? Colors.redAccent : Theme.of(context).accentColor,
           Colors.white),
@@ -308,71 +412,131 @@ class _CallpageState extends State<Callpage> {
 
   conclussionScreen() {
     return Scaffold(
-      appBar: appbar(context, strTitle: "Call Details"),
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        margin: EdgeInsets.only(bottom: 80),
-        child: ListView(
-          children: [
-            greenWidget(Icons.supervised_user_circle, _leads[0].name,
-                "Tap to see profile", () {},
-                col: Wrap(
-                  runSpacing: 5,
-                  children: [
-                    Divider(
-                      color: Colors.white,
-                    ),
-                    Text(
-                      "Call Details",
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700),
+        appBar: appbar(context, strTitle: "Call Details", row: close()),
+        body: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          margin: EdgeInsets.only(bottom: 80),
+          child: ListView(
+            children: [
+              greenWidget(Icons.supervised_user_circle, _leads[0].name,
+                  "Tap to see profile", () {},
+                  col: Wrap(
+                    runSpacing: 5,
+                    children: [
+                      Divider(
+                        color: Colors.white,
                       ),
-                    ),
-                    callList("date", _calls[0].startDate.toString()),
-                    callList("start", _calls[0].startDate.toString()),
-                    callList("end", _calls[0].startDate.toString()),
-                    callList("duration", "1" + "Minutes"),
-                    callList("status", _calls[0].isSuccess.toString()),
-                    Divider(
-                      color: Theme.of(context).accentColor,
-                    ),
+                      Text(
+                        "Call Details",
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      callList("date", dateFormat.format(_calls[0].startDate)),
+                      callList("start", timeFormat.format(_calls[0].startDate)),
+                      callList("end", timeFormat.format(_calls[0].endDate)),
+                      callList(
+                          "duration",
+                          _calls[0]
+                                  .startDate
+                                  .difference(_calls[0].endDate)
+                                  .inMinutes
+                                  .toString() +
+                              "Minutes"),
+                      callList(
+                          "status", _calls[0].isSuccess ? "Success" : "Failed"),
+                      Divider(
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ],
+                  )),
+              Container(
+                padding: EdgeInsets.all(20),
+                margin: EdgeInsets.only(top: 20),
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(0.0, 0.0),
+                        blurRadius: 25,
+                        spreadRadius: -10,
+                      )
+                    ],
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Column(
+                  children: [
+                    textField("No Title", _title, isEnabled: false),
+                    textField("No Notes", _notes,
+                        multiline: true, isEnabled: false)
                   ],
-                )),
-            Container(
-              padding: EdgeInsets.all(20),
-              margin: EdgeInsets.only(top: 20),
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  offset: Offset(0.0, 0.0),
-                  blurRadius: 25,
-                  spreadRadius: -10,
-                )
-              ], color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: Column(
-                children: [
-                  textField("Tap to edit title", _title, isEnabled: false),
-                  textField("Lorem ipsum ...", _notes,
-                      multiline: true, isEnabled: false)
-                ],
-              ),
-            )
-          ],
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-      bottomSheet: button("Edit", () {
-        setState(() {
-          pageIndex = 1;
-        });
-      }, Theme.of(context).accentColor, Colors.white),
+        bottomSheet: Offstage(
+          offstage: !enableEdit,
+          child: button("Edit", () {
+            setState(() {
+              pageIndex = 1;
+            });
+          }, Theme.of(context).accentColor, Colors.white),
+        ));
+  }
+
+  Row noteRow() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () {
+            if (callDetail == null) {
+              _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
+              _end = DateTime.now();
+              _calls.add(Calls(DateTime.now().toString(), _leads[0].email,
+                  _title.text, _start, _end, false, _notes.text));
+              pageIndex = 2;
+            } else {
+              calls.removeWhere((item) => item.callId == callDetail.callId);
+              Navigator.pop(context, "deleted");
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Call Logs Deleted')));
+            }
+          },
+          child: Container(
+            margin: EdgeInsets.only(top: 20),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30), color: Colors.red),
+            width: 100,
+            height: 40,
+            child: Text(
+              callDetail == null ? "Call Failed" : "Delete Logs",
+              style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        )
+      ],
     );
   }
 
-  Row callFailed() {
-    return Row();
+  Row close() {
+    return Row(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: iconButton(Icons.close, () {
+            Navigator.pop(context);
+          }),
+        )
+      ],
+    );
   }
 }

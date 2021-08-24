@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 divider(double width) {
   return Container(
-    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 100),
+    width: width,
     height: 4,
     decoration: BoxDecoration(
         color: Colors.black, borderRadius: BorderRadius.circular(20)),
@@ -19,7 +19,7 @@ PreferredSize appbar(context,
     disableTabBar = true,
     dynamic row}) {
   return PreferredSize(
-      preferredSize: Size.fromHeight(100),
+      preferredSize: Size.fromHeight(disappearedBackButton ? 100 : 120),
       child: AppBar(
         automaticallyImplyLeading: false, // hides leading widget
         flexibleSpace: Container(
@@ -31,24 +31,45 @@ PreferredSize appbar(context,
             alignment: Alignment.centerLeft,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: row == null
-                      ? MediaQuery.of(context).size.width - 50
-                      : MediaQuery.of(context).size.width / 2 - 20,
-                  child: Text(
-                    strTitle,
-                    style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            color: whiteTitle
-                                ? Colors.white
-                                : Theme.of(context).accentColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 28)),
-                    overflow: TextOverflow.clip,
-                    maxLines: 1,
-                    softWrap: false,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: disappearedBackButton
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.spaceBetween,
+                  children: [
+                    Offstage(
+                      offstage: disappearedBackButton,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Icon(
+                          Icons.chevron_left,
+                          color:
+                              whiteTitle ? Colors.white : HexColor("#C4C4C4"),
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: row == null
+                          ? MediaQuery.of(context).size.width - 50
+                          : MediaQuery.of(context).size.width / 2 - 20,
+                      child: Text(
+                        strTitle,
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                                color: whiteTitle ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 28)),
+                        overflow: TextOverflow.clip,
+                        maxLines: 1,
+                        softWrap: false,
+                      ),
+                    ),
+                  ],
                 ),
                 row == null ? Text("") : row
               ],
@@ -101,7 +122,7 @@ iconButton(IconData iconData, Function() function, {bool shaddow = true}) {
 
 inputRow(IconData icon, String name, TextEditingController text,
     BuildContext context, String types,
-    [dynamic funciton, dynamic selectedDate]) {
+    {dynamic funciton, dynamic selectedDate, bool isDisabled = false}) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -115,8 +136,8 @@ inputRow(IconData icon, String name, TextEditingController text,
             style: GoogleFonts.poppins(
               textStyle: TextStyle(
                   fontSize: 13.0,
-                  color: HexColor("#C4C4C4"),
-                  fontWeight: FontWeight.w700),
+                  color: Colors.black45,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -125,6 +146,7 @@ inputRow(IconData icon, String name, TextEditingController text,
         Expanded(
           flex: 2,
           child: TextField(
+            enabled: !isDisabled,
             style: GoogleFonts.poppins(
               textStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             ),
@@ -141,7 +163,7 @@ inputRow(IconData icon, String name, TextEditingController text,
         ),
       if (types == "datetime")
         GestureDetector(
-          onTap: funciton, // Refer step 3
+          onTap: isDisabled ? () {} : funciton, // Refer step 3
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Row(
@@ -169,21 +191,19 @@ squareAvatar() {
   return Container(
     decoration: BoxDecoration(
         color: Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
-            .withOpacity(0.5),
+            .withOpacity(0.4),
         borderRadius: BorderRadius.circular(5)),
     width: 40,
     height: 40,
   );
 }
 
-textField(
-  String hint,
-  TextEditingController text, {
-  bool multiline = false,
-  bool needFooter = false,
-  IconData footerIcon = Icons.edit,
-  bool isEnabled = true,
-}) {
+textField(String hint, TextEditingController text,
+    {bool multiline = false,
+    bool needFooter = false,
+    IconData footerIcon = Icons.edit,
+    bool isEnabled = true,
+    bool isWhite = true}) {
   return Container(
     alignment: Alignment.topRight,
     decoration: needFooter
@@ -220,8 +240,8 @@ textField(
                 ),
               ),
               filled: true,
+              fillColor: isWhite ? Colors.white : Colors.grey.withOpacity(0.2),
               contentPadding: EdgeInsets.all(16),
-              fillColor: Colors.white,
             ),
           ),
         ),
@@ -238,24 +258,30 @@ textField(
 }
 
 button(String text, dynamic function, Color bgColor, Color txtColor,
-    {IconData? icon}) {
+    {IconData? icon, double height = 60, bool rounded = false}) {
   return GestureDetector(
     onTap: function,
     child: Container(
-      height: 60,
+      height: height,
       alignment: Alignment.center,
       width: double.infinity,
-      decoration:
-          BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(0)),
-      child: Wrap(
-        spacing: 10,
+      decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius:
+              rounded ? BorderRadius.circular(5) : BorderRadius.circular(0)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Offstage(
-              offstage: icon == null,
+            offstage: icon == null,
+            child: Padding(
+              padding: EdgeInsets.only(right: 10),
               child: Icon(
                 icon,
                 color: txtColor,
-              )),
+              ),
+            ),
+          ),
           Text(
             text,
             style: GoogleFonts.poppins(
